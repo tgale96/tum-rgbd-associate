@@ -35,7 +35,7 @@ from analysis import check_consistent
 from analysis import tstamp_stats
 from read_data import read_data
 
-def associate(first_list, second_list, offset, max_diff):
+def associate(first_list, second_list, max_diff):
     """
     Associate two dictionaries of (stamp,data). As the time stamps never match exactly, 
     we aim to find the closest match for every input tuple.
@@ -43,7 +43,6 @@ def associate(first_list, second_list, offset, max_diff):
     Input:
     first_list -- first dictionary of (stamp,data) tuples
     second_list -- second dictionary of (stamp,data) tuples
-    offset -- time offset between both dictionaries (e.g., to model the delay between the sensors)
     max_diff -- search radius for candidate generation
 
     Output:
@@ -76,7 +75,7 @@ def associate(first_list, second_list, offset, max_diff):
             b_idx += 1
 
     return matches
-        
+
 if __name__ == '__main__':    
     parser = argparse.ArgumentParser(description=
                                      """This script takes two data 
@@ -90,9 +89,6 @@ if __name__ == '__main__':
     parser.add_argument('--first_only',
                         help='only output associated lines from first file',
                         action='store_true')
-    parser.add_argument('--offset',
-                        help="""time offset added to the timestamps of the 
-                        second file (default: 0.0)""", default=0.0)
     parser.add_argument('--max_difference',
                         help="""maximally allowed time difference for matching 
                         entries (default: 0.02)""", default=0.02)
@@ -101,7 +97,7 @@ if __name__ == '__main__':
     first_list = read_data(args.first_file)
     second_list = read_data(args.second_file)
 
-    matches = associate(first_list, second_list, float(args.offset), float(args.max_difference))    
+    matches = associate(first_list, second_list, float(args.max_difference))    
 
     # Check for inconsistencies. Algorithm should guarantee 0
     check_consistent(matches)
@@ -111,13 +107,5 @@ if __name__ == '__main__':
     f2 = open(args.second_file + ".assoc", "w+")
     for a,b in matches:
         f1.write("{} {}\n".format(a, " ".join(first_list[a])))
-        f2.write("{} {}\n".format(b, " ".join(second_list[b])))
-
-    # if args.first_only:
-    #     for a,b in matches:
-    #         print("%f %s"%(a, "".join(first_list[a])))
-    # else:
-    #     for a,b in matches:
-    #         print("%f %s %f %s"%(a," ".join(first_list[a]),b-float(args.offset)," ".join(second_list[b])))
-            
+        f2.write("{} {}\n".format(b, " ".join(second_list[b])))            
         
