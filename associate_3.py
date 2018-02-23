@@ -32,8 +32,8 @@
 import argparse
 from numba import jit
 
-from analysis import check_consistent
-from analysis import tstamp_stats
+from analysis import check_consistent_3
+from analysis import tstamp_stats_3
 from read_data import read_data
 
 @jit(nopython=True)
@@ -84,7 +84,8 @@ def associate(a_keys, b_keys, c_keys, max_diff):
             a_used.add(a)
             b_used.add(b)
             c_used.add(c)
-        
+
+    matches.sort()
     return matches
 
 if __name__ == '__main__':    
@@ -110,8 +111,8 @@ if __name__ == '__main__':
     matches = associate(a_list.keys(), b_list.keys(), c_list.keys(), float(args.max_difference))    
 
     # Check for inconsistencies. Algorithm should guarantee 0
-    # check_consistent(matches)
-    # tstamp_stats(matches)
+    check_consistent_3(matches)
+    tstamp_stats_3(matches)
 
     f1 = open(args.first_file + ".assoc", "w+")
     f2 = open(args.second_file + ".assoc", "w+")
