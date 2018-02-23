@@ -89,9 +89,14 @@ if __name__ == '__main__':
     ''')
     parser.add_argument('first_file', help='first text file (format: timestamp data)')
     parser.add_argument('second_file', help='second text file (format: timestamp data)')
-    parser.add_argument('--first_only', help='only output associated lines from first file', action='store_true')
-    parser.add_argument('--offset', help='time offset added to the timestamps of the second file (default: 0.0)',default=0.0)
-    parser.add_argument('--max_difference', help='maximally allowed time difference for matching entries (default: 0.02)',default=0.02)
+    parser.add_argument('--first_only', help='only output associated lines from first file',
+                        action='store_true')
+    parser.add_argument('--offset',
+                        help="""time offset added to the timestamps of the second 
+                        file (default: 0.0)""", default=0.0)
+    parser.add_argument('--max_difference',
+                        help="""maximally allowed time difference for matching 
+                        entries (default: 0.02)""", default=0.02)
     args = parser.parse_args()
 
     first_list = read_data(args.first_file)
@@ -99,13 +104,14 @@ if __name__ == '__main__':
 
     matches = associate(first_list, second_list,float(args.offset),float(args.max_difference))    
 
-    # if args.first_only:
-    #     for a,b in matches:
-    #         print("%f %s"%(a," ".join(first_list[a])))
-    # else:
-    #     for a,b in matches:
-    #         print("%f %s %f %s"%(a," ".join(first_list[a]),b-float(args.offset)," ".join(second_list[b])))
-
     check_consistent(matches)
     tstamp_stats(matches)
+    
+    f1 = open(args.first_file + ".tumassoc", "w+")
+    f2 = open(args.second_file + ".tumassoc", "w+")
+    for a,b in matches:
+        f1.write("{} {}\n".format(a, " ".join(first_list[a])))
+        f2.write("{} {}\n".format(b-float(args.offset), " ".join(second_list[b])))
+
+
         
