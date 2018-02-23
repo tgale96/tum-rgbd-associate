@@ -89,8 +89,6 @@ if __name__ == '__main__':
     ''')
     parser.add_argument('first_file', help='first text file (format: timestamp data)')
     parser.add_argument('second_file', help='second text file (format: timestamp data)')
-    parser.add_argument('--first_only', help='only output associated lines from first file',
-                        action='store_true')
     parser.add_argument('--offset',
                         help="""time offset added to the timestamps of the second 
                         file (default: 0.0)""", default=0.0)

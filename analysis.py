@@ -27,5 +27,6 @@ def tstamp_stats(matches):
     maximum = diffs.max()
     minimum = diffs.min()
 
-    print("mean/std/max/min deviation: {} / {} / {} / {}".format(mean, std, maximum, minimum))
+    print("num/mean/std/max/min deviation: {} / {} / {} / {} / {}"
+          .format(len(matches), mean, std, maximum, minimum))
     
