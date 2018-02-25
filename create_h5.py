@@ -7,8 +7,13 @@ def img_stats(t):
     t = np.array(t)
     print("max, min, mean, std: {} / {} / {} / {}"
           .format(t.max(), t.min(), np.mean(t), np.std(t)))
-    
-def read_images(dirname, fname, jpeg_compress=False):
+
+def concat_to_array(data):
+    tmp = [np.reshape(a, (1,) + a.shape) for a in data]
+    return np.concatenate(tmp)
+
+def read_images(dirname, fname):
+    results = []
     with open(dirname + "/" + fname, 'r') as file:
         for line in file:
             # ignore comments
@@ -18,14 +23,20 @@ def read_images(dirname, fname, jpeg_compress=False):
 
             img = cv2.imread(dirname + "/" + img_name, -1)
 
-            if jpeg_compress:
-                _, img = cv2.imencode(".jpg", img, [cv2.IMWRITE_JPEG_QUALITY, 90])
-            else:
-                _, img = cv2.imencode(".png", img, [cv2.IMWRITE_PNG_COMPRESSION, 9])
+            results.append(img)
+    return concat_to_array(results)
 
-            break
+def read_pose(fpath):
+    poses = []
+    with open(fpath, 'r') as file:
+        for line in file:
+            # ignore comments
+            if line[0] == '#':
+                continue
+            pose = np.array(line.split()[1:])
+            poses.append(pose)
+    return concat_to_array(poses)
 
-    
 if __name__ == "__main__":
     p = ap.ArgumentParser(description="""Insert a dataset of rgb, 
     depth, and pose samples into the given hdf5 file""")
@@ -34,6 +45,21 @@ if __name__ == "__main__":
     p.add_argument("--data_dir", help="directory containing data to add")
     args = p.parse_args()
 
-    # Read in the rgb images
-    read_images(args.data_dir, "rgb.txt.assoc", jpeg_compress=True)
-    read_images(args.data_dir, "depth.txt.assoc", jpeg_compress=False)
+    f = h5.File(args.h5_file, "a")
+    if args.data_dir in f:
+        print("Dataset already exists in specified file.")
+        exit(0)
+        
+    # Read in all rgb, depth, and pose samples
+    rgb_imgs = read_images(args.data_dir, "rgb.txt.assoc")
+    depth_imgs = read_images(args.data_dir, "depth.txt.assoc")
+    poses = read_pose(args.data_dir + "/groundtruth.txt.assoc")
+    
+    # create the dataset
+    rgb_dset = f.create_dataset(args.data_dir + "/rgb", data=rgb_imgs,
+                                chunks=True, compression='gzip', compression_opts=4)
+    depth_dset = f.create_dataset(args.data_dir + "/depth", data=depth_imgs,
+                                  chunks=True, compression='gzip', compression_opts=4)
+    pose_dset = f.create_dataset(args.data_dir + "/pose", data=poses,
+                                 chunks=True, compression='gzip', compression_opts=4)
+    f.close()
