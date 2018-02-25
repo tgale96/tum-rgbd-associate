@@ -3,7 +3,7 @@ import cv2
 import h5py as h5
 import numpy as np
 
-def stats(t):
+def img_stats(t):
     t = np.array(t)
     print("max, min, mean, std: {} / {} / {} / {}"
           .format(t.max(), t.min(), np.mean(t), np.std(t)))
@@ -18,17 +18,10 @@ def read_images(dirname, fname, jpeg_compress=False):
 
             img = cv2.imread(dirname + "/" + img_name, -1)
 
-            stats(img) # DEBUG
-            
             if jpeg_compress:
-                img = cv2.imencode(".jpg", img, [cv2.IMWRITE_JPEG_QUALITY, 90])
+                _, img = cv2.imencode(".jpg", img, [cv2.IMWRITE_JPEG_QUALITY, 90])
             else:
-                img = cv2.imencode(".png", img, [cv2.IMWRITE_PNG_COMPRESSION, 90])
-
-            # DEBUG
-            print(img)
-            img = cv2.imdecode(img, -1)
-            stats(img)
+                _, img = cv2.imencode(".png", img, [cv2.IMWRITE_PNG_COMPRESSION, 9])
 
             break
 
@@ -43,4 +36,4 @@ if __name__ == "__main__":
 
     # Read in the rgb images
     read_images(args.data_dir, "rgb.txt.assoc", jpeg_compress=True)
-    # read_images(args.data_dir, "depth.txt.assoc")
+    read_images(args.data_dir, "depth.txt.assoc", jpeg_compress=False)
