@@ -3,3 +3,8 @@
 *.tumassoc
 *~
 rgbd_dataset_freiburg1_xyz
+rgbd_dataset_freiburg1_rpy
+rgbd_dataset_freiburg2_xyz
+rgbd_dataset_freiburg2_rpy
+test
+slam_data.h5
